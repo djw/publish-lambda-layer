@@ -1,10 +1,10 @@
-name: 'Node 12 Template Action'
-description: 'Get started with Node actions'
-author: 'GitHub'
+name: 'Publish AWS Lambda Layer'
+description: 'Publish AWS Lambda Layer'
+author: 'Dan Wilson'
 inputs: 
-  myInput:
-    description: 'Input to use'
-    default: 'world'
+  path:
+    description: 'Path to zip file'
+    required: true
 runs:
   using: 'node12'
   main: 'lib/main.js'
