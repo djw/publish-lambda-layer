@@ -5,6 +5,18 @@ inputs:
   path:
     description: 'Path to zip file'
     required: true
+  bucket:
+    description: 'S3 bucket to upload to'
+    required: true
+  key:
+    description: 'S3 key to upload to'
+    required: true
+  layer:
+    description: 'Layer Name'
+    required: true
+  description:
+    description: 'Layer Description'
+    required: true
 runs:
   using: 'node12'
   main: 'lib/main.js'
