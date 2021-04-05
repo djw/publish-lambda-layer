@@ -32,7 +32,7 @@ async function run() {
               S3Bucket: bucket,
               S3Key: key
             },
-            CompatibleRuntimes: ['python3.7'],
+            CompatibleRuntimes: [core.getInput('runtime')],
           }, (err, data) => {
             if (err) {
               throw err;

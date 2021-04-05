@@ -17,6 +17,10 @@ inputs:
   description:
     description: "Layer Description"
     required: true
+  runtime:
+    description: "AWS Lambda Runtime"
+    required: false
+    default: "python3.7"
 runs:
   using: "node12"
   main: "lib/main.js"
