@@ -33,6 +33,7 @@ async function run() {
               S3Key: key
             },
             CompatibleRuntimes: [core.getInput('runtime')],
+            CompatibleArchitectures: [core.getInput('architectures')]
           }, (err, data) => {
             if (err) {
               throw err;
