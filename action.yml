@@ -21,8 +21,8 @@ inputs:
     description: "AWS Lambda Runtime"
     required: false
     default: "python3.7"
-  architectures:
-    description: "AWS Lambda Architectures"
+  architecture:
+    description: "AWS Lambda Architecture"
     required: false
     default: "x86_64"
 runs:
