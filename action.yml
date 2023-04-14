@@ -26,5 +26,5 @@ inputs:
     required: false
     default: "x86_64"
 runs:
-  using: "node12"
-  main: "lib/main.js"
+  using: "node16"
+  main: "dist/index.js"
