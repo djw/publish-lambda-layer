@@ -1,11 +1,15 @@
 import * as core from "@actions/core";
-import { Lambda, S3 } from "aws-sdk";
-import { createHash } from "crypto";
-import { readFile } from "fs";
-import { parse } from "path";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  LambdaClient,
+  PublishLayerVersionCommand,
+} from "@aws-sdk/client-lambda";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { parse } from "node:path";
 
-const s3 = new S3({ region: "eu-west-1" });
-const lambda = new Lambda({ region: "eu-west-1" });
+const s3Client = new S3Client({ region: "eu-west-1" });
+const lambdaClient = new LambdaClient({ region: "eu-west-1" });
 
 async function run() {
   try {
@@ -13,45 +17,30 @@ async function run() {
     const bucket = core.getInput("bucket");
     const parsedKey = parse(core.getInput("key"));
     const hash = createHash("md5");
-    readFile(path, (err, buffer) => {
-      hash.update(buffer);
-      const key = `${parsedKey.dir}/${parsedKey.name}.${hash.digest("hex")}${
-        parsedKey.ext
-      }`;
-      s3.putObject(
-        {
-          ACL: "authenticated-read",
-          Body: buffer,
-          Bucket: bucket,
-          Key: key,
-        },
-        (err, data) => {
-          if (err) {
-            throw err;
-          } else {
-            lambda.publishLayerVersion(
-              {
-                LayerName: core.getInput("layer"),
-                Description: core.getInput("description"),
-                Content: {
-                  S3Bucket: bucket,
-                  S3Key: key,
-                },
-                CompatibleRuntimes: [core.getInput("runtime")],
-                CompatibleArchitectures: [core.getInput("architecture")],
-              },
-              (err, data) => {
-                if (err) {
-                  throw err;
-                } else {
-                  core.debug(JSON.stringify(data));
-                }
-              }
-            );
-          }
-        }
-      );
+    const buffer = await readFile(path);
+    hash.update(buffer);
+    const key = `${parsedKey.dir}/${parsedKey.name}.${hash.digest("hex")}${
+      parsedKey.ext
+    }`;
+    const putCmd = new PutObjectCommand({
+      ACL: "authenticated-read",
+      Body: buffer,
+      Bucket: bucket,
+      Key: key,
     });
+    await s3Client.send(putCmd);
+
+    const command = new PublishLayerVersionCommand({
+      LayerName: core.getInput("layer"),
+      Description: core.getInput("description"),
+      Content: {
+        S3Bucket: bucket,
+        S3Key: key,
+      },
+      CompatibleRuntimes: [core.getInput("runtime")],
+      CompatibleArchitectures: [core.getInput("architecture")],
+    });
+    await lambdaClient.send(command);
   } catch (error: any) {
     core.setFailed(error.message);
   }
